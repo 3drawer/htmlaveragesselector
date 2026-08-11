@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Averages Picker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0b0d12;
+    --panel: #12141c;
+    --panel-2: #171a24;
+    --line: #262a37;
+    --text: #eef1f6;
+    --muted: #838a9c;
+    --amber: #e8b339;
+    --amber-dim: rgba(232,179,57,0.5);
+    --teal: #34c4ac;
+    --teal-dim: rgba(52,196,172,0.14);
+    --teal-hover: #45d8bf;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(1200px 600px at 50% -10%, #161a26 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+  }
+
+  body {
+    width: 100%;
+    padding: 56px 20px 80px;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 920px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .page-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-align: center;
+  }
+
+  h1 span {
+    color: var(--amber);
+  }
+
+  .layout {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .col-left {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .col-right {
+    min-width: 0;
+  }
+
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding: 7px 16px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .reset-btn:hover {
+    color: var(--text);
+    border-color: var(--muted);
+  }
+  .reset-btn:active { transform: scale(0.97); }
+
+  .range-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .range-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .range-inputs input {
+    width: 84px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--amber);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+    padding: 9px 8px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .range-inputs input::placeholder { color: #4b5063; }
+  .range-inputs input:focus {
+    border-color: var(--amber-dim);
+    box-shadow: 0 0 0 3px rgba(232,179,57,0.12);
+  }
+  .range-inputs input.invalid {
+    border-color: #d9534f;
+    box-shadow: 0 0 0 3px rgba(217,83,79,0.14);
+  }
+
+  .range-dash { color: var(--muted); font-size: 14px; }
+
+  .range-hint {
+    font-size: 12px;
+    color: #d9534f;
+    min-height: 16px;
+    text-align: left;
+  }
+
+  .average-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    width: 100%;
+  }
+
+  .average-label {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .average-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 40px;
+    color: var(--amber);
+    line-height: 1;
+  }
+
+  .picks-box {
+    width: 100%;
+    background: #0d0f15;
+    border-radius: 14px;
+    padding: 18px 16px;
+    min-height: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .picks-row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+
+  .pick-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: rgba(238,241,246,0.38);
+    padding: 2px 4px;
+  }
+
+  .picks-empty {
+    font-size: 13px;
+    color: #4b5063;
+    font-style: italic;
+  }
+
+  .board {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 90px;
+  }
+
+  .board-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .num-btn {
+    flex: 1;
+    background: var(--teal-dim);
+    border: 1px solid rgba(52,196,172,0.35);
+    color: var(--teal);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 6px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.12s ease, transform 0.08s ease, border-color 0.12s ease;
+  }
+  .num-btn:hover {
+    background: rgba(52,196,172,0.24);
+    border-color: var(--teal-hover);
+  }
+  .num-btn:active {
+    transform: scale(0.95);
+  }
+  .num-btn.selected {
+    background: var(--teal);
+    color: #08110f;
+    border-color: var(--teal);
+  }
+
+  .board-empty {
+    margin: auto;
+    color: #4b5063;
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  @media (max-width: 720px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+    .col-left {
+      align-items: center;
+      text-align: center;
+    }
+    .range-row {
+      justify-content: center;
+    }
+    .range-hint {
+      text-align: center;
+    }
+    .average-block {
+      align-items: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .average-value { font-size: 32px; }
+    .board { padding: 14px; }
+    .num-btn { font-size: 13px; padding: 12px 4px; }
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <header class="page-header">
+      <h1>Averages <span>Picker</span></h1>
+      <button class="reset-btn" id="resetBtn">Reset</button>
+    </header>
+
+    <div class="layout">
+      <div class="col-left">
+        <div>
+          <div class="range-row">
+            <span class="range-label">Range</span>
+            <div class="range-inputs">
+              <input type="text" inputmode="numeric" id="rangeStart" placeholder="0">
+              <span class="range-dash">&ndash;</span>
+              <input type="text" inputmode="numeric" id="rangeEnd" placeholder="0">
+            </div>
+          </div>
+          <div class="range-hint" id="rangeHint"></div>
+        </div>
+
+        <div class="average-block">
+          <div class="average-label">Average</div>
+          <div class="average-value" id="averageValue">&ndash;</div>
+          <div class="picks-box" id="picksBox">
+            <span class="picks-empty">No numbers selected yet</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-right">
+        <div class="board" id="board">
+          <span class="board-empty">Fill in both range values to populate</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const rangeStartEl = document.getElementById('rangeStart');
+  const rangeEndEl = document.getElementById('rangeEnd');
+  const rangeHintEl = document.getElementById('rangeHint');
+  const boardEl = document.getElementById('board');
+  const picksBoxEl = document.getElementById('picksBox');
+  const averageValueEl = document.getElementById('averageValue');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let selections = []; // list of chosen numbers (values), in click order
+  let currentRangeNumbers = null; // array of numbers currently populated in board
+
+  function isIntegerString(s) {
+    return /^-?\d+$/.test(s.trim());
+  }
+
+  function chunk(arr, size) {
+    const out = [];
+    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+    return out;
+  }
+
+  function renderBoard() {
+    const startRaw = rangeStartEl.value;
+    const endRaw = rangeEndEl.value;
+
+    rangeStartEl.classList.remove('invalid');
+    rangeEndEl.classList.remove('invalid');
+    rangeHintEl.textContent = '';
+
+    if (startRaw.trim() === '' || endRaw.trim() === '') {
+      // do nothing to the board if either is empty
+      return;
+    }
+
+    if (!isIntegerString(startRaw) || !isIntegerString(endRaw)) {
+      if (!isIntegerString(startRaw)) rangeStartEl.classList.add('invalid');
+      if (!isIntegerString(endRaw)) rangeEndEl.classList.add('invalid');
+      rangeHintEl.textContent = 'Whole numbers only';
+      return;
+    }
+
+    const start = parseInt(startRaw, 10);
+    const end = parseInt(endRaw, 10);
+    const lo = Math.min(start, end);
+    const hi = Math.max(start, end);
+
+    const numbers = [];
+    for (let n = lo; n <= hi; n++) numbers.push(n);
+
+    // Only re-render buttons if the range actually changed, so existing
+    // selections / visuals aren't needlessly disturbed
+    const sameAsCurrent = currentRangeNumbers &&
+      currentRangeNumbers.length === numbers.length &&
+      currentRangeNumbers.every((v, i) => v === numbers[i]);
+
+    if (sameAsCurrent) return;
+
+    currentRangeNumbers = numbers;
+    boardEl.innerHTML = '';
+
+    const rows = chunk(numbers, 10);
+    rows.forEach(row => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'board-row';
+      row.forEach(num => {
+        const btn = document.createElement('button');
+        btn.className = 'num-btn';
+        btn.type = 'button';
+        btn.textContent = num;
+        btn.dataset.value = num;
+        btn.addEventListener('click', () => onNumberClick(num, btn));
+        rowEl.appendChild(btn);
+      });
+      boardEl.appendChild(rowEl);
+    });
+  }
+
+  function onNumberClick(num, btnEl) {
+    selections.push(num);
+    btnEl.classList.add('selected');
+    // brief pulse then release the "selected" emphasis so repeat clicks stay visible
+    window.requestAnimationFrame(() => {
+      setTimeout(() => btnEl.classList.remove('selected'), 160);
+    });
+    renderPicks();
+    renderAverage();
+  }
+
+  function renderPicks() {
+    picksBoxEl.innerHTML = '';
+    if (selections.length === 0) {
+      const empty = document.createElement('span');
+      empty.className = 'picks-empty';
+      empty.textContent = 'No numbers selected yet';
+      picksBoxEl.appendChild(empty);
+      return;
+    }
+    const rows = chunk(selections, 3);
+    rows.forEach(row => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'picks-row';
+      row.forEach(num => {
+        const chip = document.createElement('span');
+        chip.className = 'pick-chip';
+        chip.textContent = num;
+        rowEl.appendChild(chip);
+      });
+      picksBoxEl.appendChild(rowEl);
+    });
+  }
+
+  function renderAverage() {
+    if (selections.length === 0) {
+      averageValueEl.textContent = '\u2013';
+      return;
+    }
+    const sum = selections.reduce((a, b) => a + b, 0);
+    const avg = sum / selections.length;
+    const rounded = Math.round(avg * 100) / 100;
+    averageValueEl.textContent = rounded;
+  }
+
+  resetBtn.addEventListener('click', () => {
+    selections = [];
+    renderPicks();
+    renderAverage();
+  });
+
+  rangeStartEl.addEventListener('input', renderBoard);
+  rangeEndEl.addEventListener('input', renderBoard);
+</script>
+</body>
+</html>
